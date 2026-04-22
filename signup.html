@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign Up — SpeakUp</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%234A7899'/><text x='8' y='22' font-size='18' font-weight='900' fill='white' font-family='Helvetica'>S</text></svg>">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="accessibility.css">
+  <link rel="stylesheet" href="captcha.css">
+  <style>
+    .auth-page {
+      min-height: 100vh; display: flex; align-items: center; justify-content: center;
+      padding: 80px 24px 40px;
+    }
+    .signup-layout {
+      display: grid; grid-template-columns: 480px 1fr; gap: 80px;
+      max-width: 960px; width: 100%; align-items: center;
+    }
+    .auth-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 40px; }
+    .auth-card-header { margin-bottom: 28px; }
+    .auth-card-header h2 { font-size: 1.4rem; margin-bottom: 6px; }
+    .auth-card-header p { font-size: 13px; color: var(--text-muted); }
+
+    .level-selector { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 8px; }
+    .level-option { display: none; }
+    .level-label {
+      display: block; text-align: center; padding: 12px 8px;
+      background: rgba(74,120,153,0.08); border: 1px solid var(--border);
+      border-radius: var(--radius); cursor: pointer; font-size: 12px; font-weight: 600;
+      color: var(--text-secondary); transition: all 0.2s; letter-spacing: 0.04em;
+    }
+    .level-option:checked + .level-label {
+      background: rgba(74,120,153,0.2); border-color: var(--sky-blue); color: var(--text-primary);
+    }
+    .level-label:hover { border-color: rgba(122,175,197,0.35); color: var(--text-primary); }
+
+    .password-strength { margin-top: 6px; display: flex; gap: 4px; }
+    .strength-bar { height: 3px; flex: 1; background: rgba(74,120,153,0.15); border-radius: 2px; transition: background 0.3s; }
+    .strength-bar.weak { background: #b85c5c; }
+    .strength-bar.medium { background: #c9a84c; }
+    .strength-bar.strong { background: #5a9e7a; }
+
+    .signup-right .eyebrow {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(74,120,153,0.12); border: 1px solid rgba(122,175,197,0.2);
+      border-radius: 999px; padding: 5px 14px; font-size: 11px;
+      font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--sky-blue); margin-bottom: 20px;
+    }
+    .signup-right h2 { font-size: clamp(1.5rem,3vw,2.2rem); margin-bottom: 16px; }
+    .signup-right p { font-size: 14px; color: var(--text-secondary); line-height: 1.7; margin-bottom: 32px; }
+    .plan-card {
+      background: rgba(33,52,72,0.6); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); padding: 24px; margin-bottom: 16px;
+    }
+    .plan-card.featured { border-color: rgba(122,175,197,0.4); background: rgba(74,120,153,0.12); }
+    .plan-name { font-size: 13px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 4px; }
+    .plan-price { font-size: 1.8rem; font-weight: 700; color: var(--text-primary); }
+    .plan-price span { font-size: 13px; font-weight: 400; color: var(--text-muted); }
+    .plan-features { margin-top: 16px; display: flex; flex-direction: column; gap: 8px; }
+    .plan-feature { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-secondary); }
+    .plan-feature::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: var(--sky-blue); flex-shrink: 0; }
+
+    @media (max-width: 768px) {
+      .signup-layout { grid-template-columns: 1fr; gap: 40px; }
+      .signup-right { display: none; }
+      .auth-card { padding: 28px 24px; }
+    }
+  </style>
+</head>
+<body>
+<div class="bg-mesh"></div>
+
+<nav class="navbar">
+  <div class="navbar-inner">
+    <a href="index.html" class="navbar-brand"><div class="brand-icon">S</div>SpeakUp</a>
+    <div class="navbar-search">
+      <span class="search-icon">&#9906;</span>
+      <input type="text" class="search-input" placeholder="Search scenarios...">
+    </div>
+    <div class="navbar-links">
+      <a href="index.html">Home</a>
+      <a href="scenarios.html">Scenarios</a>
+      <a href="dashboard.html">Dashboard</a>
+      <a href="practice.html">Practice</a>
+      <a href="map.html">Find Coach</a>
+    </div>
+    <div class="navbar-actions nav-auth-actions">
+      <a href="login.html" class="btn btn-ghost btn-sm">Sign In</a>
+      <a href="signup.html" class="btn btn-solid btn-sm">
+        <span class="btn-neon-top"></span>Get Started<span class="btn-neon-bottom"></span>
+      </a>
+    </div>
+    <button class="navbar-toggle"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+<div class="mobile-nav">
+  <a href="index.html">Home</a>
+  <a href="scenarios.html">Scenarios</a>
+  <a href="login.html">Sign In</a>
+</div>
+
+<main class="page-wrapper">
+  <div class="auth-page">
+    <div class="signup-layout">
+      <div class="auth-card fade-up">
+        <div class="auth-card-header">
+          <h2>Create Your Account</h2>
+          <p>Free forever. No credit card required.</p>
+        </div>
+
+        <form id="signupForm" novalidate>
+          <div class="form-group">
+            <label class="form-label" for="fullName">Full Name</label>
+            <input type="text" id="fullName" class="form-input" placeholder="Jane Smith" autocomplete="name">
+            <div class="form-error hidden" id="nameError">Please enter your name.</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="email">Email Address</label>
+            <input type="email" id="email" class="form-input" placeholder="you@example.com" autocomplete="email">
+            <div class="form-error hidden" id="emailError">Please enter a valid email.</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="password">Password</label>
+            <input type="password" id="password" class="form-input" placeholder="Minimum 8 characters" autocomplete="new-password">
+            <div class="password-strength">
+              <div class="strength-bar" id="sb1"></div>
+              <div class="strength-bar" id="sb2"></div>
+              <div class="strength-bar" id="sb3"></div>
+              <div class="strength-bar" id="sb4"></div>
+            </div>
+            <div class="form-error hidden" id="passwordError">Password must be at least 8 characters.</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Experience Level</label>
+            <div class="level-selector">
+              <input type="radio" name="level" id="l1" value="beginner" class="level-option" checked>
+              <label for="l1" class="level-label">Beginner</label>
+              <input type="radio" name="level" id="l2" value="intermediate" class="level-option">
+              <label for="l2" class="level-label">Intermediate</label>
+              <input type="radio" name="level" id="l3" value="advanced" class="level-option">
+              <label for="l3" class="level-label">Advanced</label>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="checkbox-group" style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;">
+              <input type="checkbox" id="terms" style="margin-top:2px;accent-color:var(--steel-blue);">
+              <span style="font-size:12px;color:var(--text-muted);line-height:1.5;">
+                I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>
+              </span>
+            </label>
+            <div class="form-error hidden" id="termsError">You must accept the terms.</div>
+          </div>
+          <button type="submit" class="btn btn-solid w-full" style="width:100%;justify-content:center;">
+            <span class="btn-neon-top"></span>Create Free Account<span class="btn-neon-bottom"></span>
+          </button>
+        </form>
+
+        <div class="divider-text mt-16">already have an account</div>
+        <a href="login.html" class="btn btn-outline w-full mt-12" style="width:100%;justify-content:center;margin-top:12px;">
+          <span class="btn-neon-top"></span>Sign In Instead<span class="btn-neon-bottom"></span>
+        </a>
+      </div>
+
+      <div class="signup-right fade-up-delay-1">
+        <div class="eyebrow">What you get</div>
+        <h2>Everything you need to grow</h2>
+        <p>SpeakUp gives you a complete, structured path from first practice session to confident speaker.</p>
+
+        <div class="plan-card featured">
+          <div class="plan-name">Free Plan</div>
+          <div class="plan-price">$0 <span>/month</span></div>
+          <div class="plan-features">
+            <div class="plan-feature">Access to 10 starter scenarios</div>
+            <div class="plan-feature">AI feedback on every session</div>
+            <div class="plan-feature">Progress dashboard</div>
+            <div class="plan-feature">Structural guides included</div>
+            <div class="plan-feature">Session history (30 days)</div>
+          </div>
+        </div>
+        <div class="plan-card">
+          <div class="plan-name">Pro Plan</div>
+          <div class="plan-price">$9 <span>/month</span></div>
+          <div class="plan-features">
+            <div class="plan-feature">All 24+ scenarios unlocked</div>
+            <div class="plan-feature">Advanced AI analysis + scoring</div>
+            <div class="plan-feature">Unlimited session history</div>
+            <div class="plan-feature">Custom scenario builder</div>
+            <div class="plan-feature">Priority support</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<div class="page-scroll-btns">
+  <button class="scroll-up">&#8593;</button>
+  <button class="scroll-down">&#8595;</button>
+</div>
+<script src="main.js"></script>
+<script>
+  // Init captcha
+  window.addEventListener('load', () => initCaptcha('signup-captcha-container'));
+
+  // Password strength
+  document.getElementById('password').addEventListener('input', function() {
+    const val = this.value;
+    const bars = ['sb1','sb2','sb3','sb4'];
+    bars.forEach(id => { document.getElementById(id).className = 'strength-bar'; });
+    if (val.length >= 4) document.getElementById('sb1').classList.add('weak');
+    if (val.length >= 8) { document.getElementById('sb1').classList.add('medium'); document.getElementById('sb2').classList.add('medium'); }
+    if (val.length >= 10 && /[A-Z]/.test(val)) { ['sb1','sb2','sb3'].forEach(id => document.getElementById(id).classList.replace('medium','strong')); }
+    if (val.length >= 12 && /[A-Z]/.test(val) && /[0-9]/.test(val)) {
+      bars.forEach(id => { document.getElementById(id).className = 'strength-bar strong'; });
+    }
+  });
+
+  document.getElementById('signupForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const name = document.getElementById('fullName').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+    const terms = document.getElementById('terms').checked;
+    let valid = true;
+
+    ['nameError','emailError','passwordError','termsError'].forEach(id => document.getElementById(id).classList.add('hidden'));
+
+    if (!name) { document.getElementById('nameError').classList.remove('hidden'); valid = false; }
+    if (!email || !/\S+@\S+\.\S+/.test(email)) { document.getElementById('emailError').classList.remove('hidden'); valid = false; }
+    if (password.length < 8) { document.getElementById('passwordError').classList.remove('hidden'); valid = false; }
+    if (!terms) { document.getElementById('termsError').classList.remove('hidden'); valid = false; }
+    if (!valid) return;
+
+    // Verify CAPTCHA
+    const captchaContainer = document.getElementById('signup-captcha-container');
+    if (captchaContainer && captchaContainer._verifyCaptcha && !captchaContainer._verifyCaptcha()) return;
+
+    Auth.login({ name, email, level: document.querySelector('input[name="level"]:checked').value });
+    showToast('Account created! Welcome to SpeakUp.', 'success');
+    setTimeout(() => window.location.href = 'dashboard.html', 900);
+  });
+</script>
+<script src="a11y.js"></script>
+<script src="captcha.js"></script>
+<script src="ai-coach.js"></script>
+</body>
+</html>

@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Account — SpeakUp</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%234A7899'/><text x='8' y='22' font-size='18' font-weight='900' fill='white' font-family='Helvetica'>S</text></svg>">
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .account-layout { max-width: 900px; margin: 0 auto; padding: 40px 24px 80px; }
+
+    /* ── Profile header ── */
+    .profile-header {
+      display: flex; gap: 28px; align-items: flex-start;
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); padding: 32px; margin-bottom: 24px;
+      position: relative; overflow: hidden;
+    }
+    .profile-header::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 80px;
+      background: linear-gradient(135deg, rgba(74,120,153,0.2), rgba(122,175,197,0.1));
+      border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    }
+    .profile-avatar-wrap { position: relative; z-index: 1; flex-shrink: 0; }
+    .profile-avatar {
+      width: 80px; height: 80px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--steel-blue), var(--sky-blue));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2rem; font-weight: 700; color: white;
+      border: 3px solid var(--bg-card); box-shadow: 0 0 0 1px var(--border);
+    }
+    .profile-info { position: relative; z-index: 1; padding-top: 24px; }
+    .profile-name { font-size: 1.5rem; font-weight: 700; margin-bottom: 4px; }
+    .profile-email { font-size: 13px; color: var(--text-muted); margin-bottom: 12px; }
+    .profile-badges { display: flex; gap: 8px; flex-wrap: wrap; }
+    .profile-actions { margin-left: auto; position: relative; z-index: 1; padding-top: 24px; display: flex; gap: 8px; }
+
+    /* ── Stats row ── */
+    .account-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+    .account-stat { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px; text-align: center; }
+    .account-stat-num { font-size: 1.8rem; font-weight: 700; margin-bottom: 4px; }
+    .account-stat-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; }
+
+    /* ── Tabs ── */
+    .tabs { display: flex; gap: 0; border-bottom: 1px solid var(--border); margin-bottom: 24px; }
+    .tab-btn {
+      padding: 12px 20px; font-family: Helvetica,Arial,sans-serif; font-size: 13px; font-weight: 600;
+      color: var(--text-muted); background: none; border: none; cursor: pointer;
+      border-bottom: 2px solid transparent; margin-bottom: -1px; transition: all 0.15s;
+    }
+    .tab-btn:hover { color: var(--text-secondary); }
+    .tab-btn.active { color: var(--sky-blue); border-bottom-color: var(--sky-blue); }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* ── Activity list ── */
+    .activity-item {
+      display: flex; align-items: center; gap: 16px; padding: 14px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .activity-item:last-child { border-bottom: none; }
+    .activity-icon { width: 38px; height: 38px; border-radius: 10px; background: rgba(74,120,153,0.12); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; }
+    .activity-info { flex: 1; }
+    .activity-title { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
+    .activity-time { font-size: 12px; color: var(--text-muted); }
+    .activity-score { font-size: 1.1rem; font-weight: 700; color: var(--text-primary); }
+
+    /* ── Skills radar (CSS) ── */
+    .skills-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+    .skill-item { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 18px 20px; }
+    .skill-name { font-size: 13px; font-weight: 600; margin-bottom: 8px; }
+    .skill-level { font-size: 11px; color: var(--text-muted); margin-bottom: 8px; }
+    .skill-xp { font-size: 12px; color: var(--sky-blue); font-weight: 700; }
+
+    /* ── Achievements ── */
+    .achievements-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+    .achievement {
+      background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg);
+      padding: 20px; text-align: center; transition: all 0.2s;
+    }
+    .achievement:hover { border-color: rgba(122,175,197,0.35); }
+    .achievement.locked { opacity: 0.4; }
+    .achievement-icon { font-size: 2rem; margin-bottom: 10px; }
+    .achievement-name { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+    .achievement-desc { font-size: 11px; color: var(--text-muted); line-height: 1.5; }
+
+    @media (max-width: 700px) {
+      .profile-header { flex-wrap: wrap; }
+      .profile-actions { width: 100%; }
+      .account-stats { grid-template-columns: repeat(2,1fr); }
+      .achievements-grid { grid-template-columns: repeat(2,1fr); }
+      .skills-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+<div class="bg-mesh"></div>
+
+<nav class="navbar">
+  <div class="navbar-inner">
+    <a href="index.html" class="navbar-brand"><div class="brand-icon">S</div>SpeakUp</a>
+    <div class="navbar-search">
+      <span class="search-icon">&#9906;</span>
+      <input type="text" class="search-input" placeholder="Search scenarios...">
+    </div>
+    <div class="navbar-links">
+      <a href="index.html">Home</a>
+      <a href="scenarios.html">Scenarios</a>
+      <a href="dashboard.html">Dashboard</a>
+      <a href="practice.html">Practice</a>
+      <a href="map.html">Find Coach</a>
+
+    </div>
+    <div class="navbar-actions nav-auth-actions">
+      <a href="login.html" class="btn btn-ghost btn-sm">Sign In</a>
+      <a href="signup.html" class="btn btn-solid btn-sm">
+        <span class="btn-neon-top"></span>Get Started<span class="btn-neon-bottom"></span>
+      </a>
+    </div>
+    <button class="navbar-toggle"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+<div class="mobile-nav">
+  <a href="index.html">Home</a>
+  <a href="scenarios.html">Scenarios</a>
+  <a href="dashboard.html">Dashboard</a>
+  <a href="practice.html">Practice</a>
+  <a href="settings.html">Settings</a>
+</div>
+
+<main class="page-wrapper">
+  <div class="account-layout">
+
+    <!-- Profile Header -->
+    <div class="profile-header fade-up">
+      <div class="profile-avatar-wrap">
+        <div class="profile-avatar" id="profileAvatar">U</div>
+      </div>
+      <div class="profile-info">
+        <div class="profile-name" id="profileName">User</div>
+        <div class="profile-email" id="profileEmail">user@example.com</div>
+        <div class="profile-badges">
+          <span class="badge badge-default" id="profileLevel">Beginner</span>
+          <span class="badge badge-success">5-Day Streak</span>
+          <span class="badge badge-neutral">Free Plan</span>
+        </div>
+      </div>
+      <div class="profile-actions">
+        <a href="settings.html" class="btn btn-outline btn-sm">
+          <span class="btn-neon-top"></span>Settings<span class="btn-neon-bottom"></span>
+        </a>
+        <a href="practice.html" class="btn btn-solid btn-sm">
+          <span class="btn-neon-top"></span>Practice Now<span class="btn-neon-bottom"></span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Stats Row -->
+    <div class="account-stats fade-up-delay-1">
+      <div class="account-stat">
+        <div class="account-stat-num">14</div>
+        <div class="account-stat-label">Sessions</div>
+      </div>
+      <div class="account-stat">
+        <div class="account-stat-num">73%</div>
+        <div class="account-stat-label">Avg Score</div>
+      </div>
+      <div class="account-stat">
+        <div class="account-stat-num">5</div>
+        <div class="account-stat-label">Day Streak</div>
+      </div>
+      <div class="account-stat">
+        <div class="account-stat-num">8</div>
+        <div class="account-stat-label">Scenarios</div>
+      </div>
+    </div>
+
+    <!-- Edit profile form -->
+    <div class="card mb-24 fade-up-delay-1" style="margin-bottom:24px;">
+      <div class="card-header flex-between">
+        <div>
+          <div class="card-subtitle">Profile</div>
+          <div class="card-title">Personal Information</div>
+        </div>
+        <button class="btn btn-ghost btn-sm" id="editToggle">
+          <span class="btn-neon-top"></span>Edit<span class="btn-neon-bottom"></span>
+        </button>
+      </div>
+      <form id="profileForm">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+          <div class="form-group"><label class="form-label">Full Name</label><input type="text" class="form-input" id="editName" placeholder="Your name" disabled></div>
+          <div class="form-group"><label class="form-label">Email</label><input type="email" class="form-input" id="editEmail" placeholder="your@email.com" disabled></div>
+          <div class="form-group"><label class="form-label">Experience Level</label>
+            <select class="form-input" id="editLevel" disabled>
+              <option value="beginner">Beginner</option>
+              <option value="intermediate">Intermediate</option>
+              <option value="advanced">Advanced</option>
+            </select>
+          </div>
+          <div class="form-group"><label class="form-label">Speaking Goal</label>
+            <select class="form-input" id="editGoal" disabled>
+              <option>Build general confidence</option>
+              <option>Prepare for job interviews</option>
+              <option>Academic presentations</option>
+              <option>Leadership communication</option>
+              <option>Social situations</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group"><label class="form-label">Short Bio</label><textarea class="form-input" id="editBio" placeholder="Tell us what you are working toward..." rows="3" disabled></textarea></div>
+        <div id="saveButtons" style="display:none;gap:10px;" class="flex">
+          <button type="submit" class="btn btn-solid btn-sm">
+            <span class="btn-neon-top"></span>Save Changes<span class="btn-neon-bottom"></span>
+          </button>
+          <button type="button" class="btn btn-ghost btn-sm" id="cancelEdit">
+            <span class="btn-neon-top"></span>Cancel<span class="btn-neon-bottom"></span>
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="activity">Recent Activity</button>
+      <button class="tab-btn" data-tab="skills">Skills</button>
+      <button class="tab-btn" data-tab="achievements">Achievements</button>
+    </div>
+
+    <!-- Activity -->
+    <div class="tab-panel active" id="tab-activity">
+      <div class="card">
+        <div class="activity-item"><div class="activity-icon">&#9711;</div><div class="activity-info"><div class="activity-title">Team Meeting Update</div><div class="activity-time">Today, 9:42 AM</div></div><span class="badge badge-success">90%</span></div>
+        <div class="activity-item"><div class="activity-icon">&#9670;</div><div class="activity-info"><div class="activity-title">Elevator Pitch</div><div class="activity-time">Yesterday, 7:15 PM</div></div><span class="badge badge-warning">78%</span></div>
+        <div class="activity-item"><div class="activity-icon">&#9632;</div><div class="activity-info"><div class="activity-title">Class Presentation</div><div class="activity-time">2 days ago</div></div><span class="badge badge-neutral">65%</span></div>
+        <div class="activity-item"><div class="activity-icon">&#9675;</div><div class="activity-info"><div class="activity-title">Wedding Toast</div><div class="activity-time">3 days ago</div></div><span class="badge badge-success">82%</span></div>
+        <div class="activity-item"><div class="activity-icon">&#9633;</div><div class="activity-info"><div class="activity-title">Panel Introduction</div><div class="activity-time">4 days ago</div></div><span class="badge badge-neutral">71%</span></div>
+        <div class="card-footer">
+          <a href="scenarios.html" class="btn btn-ghost btn-sm">
+            <span class="btn-neon-top"></span>Browse More Scenarios<span class="btn-neon-bottom"></span>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Skills -->
+    <div class="tab-panel" id="tab-skills">
+      <div class="skills-grid">
+        <div class="skill-item">
+          <div class="skill-name">Structure and Organization</div>
+          <div class="progress-bar" style="margin:8px 0;"><div class="progress-fill" style="width:78%"></div></div>
+          <div style="display:flex;justify-content:space-between;"><div class="skill-level">Advanced</div><div class="skill-xp">78 / 100 XP</div></div>
+        </div>
+        <div class="skill-item">
+          <div class="skill-name">Clarity and Conciseness</div>
+          <div class="progress-bar" style="margin:8px 0;"><div class="progress-fill" style="width:65%"></div></div>
+          <div style="display:flex;justify-content:space-between;"><div class="skill-level">Intermediate</div><div class="skill-xp">65 / 100 XP</div></div>
+        </div>
+        <div class="skill-item">
+          <div class="skill-name">Audience Awareness</div>
+          <div class="progress-bar" style="margin:8px 0;"><div class="progress-fill" style="width:50%"></div></div>
+          <div style="display:flex;justify-content:space-between;"><div class="skill-level">Developing</div><div class="skill-xp">50 / 100 XP</div></div>
+        </div>
+        <div class="skill-item">
+          <div class="skill-name">Storytelling</div>
+          <div class="progress-bar" style="margin:8px 0;"><div class="progress-fill" style="width:42%"></div></div>
+          <div style="display:flex;justify-content:space-between;"><div class="skill-level">Developing</div><div class="skill-xp">42 / 100 XP</div></div>
+        </div>
+        <div class="skill-item">
+          <div class="skill-name">Persuasion and Argumentation</div>
+          <div class="progress-bar" style="margin:8px 0;"><div class="progress-fill" style="width:30%"></div></div>
+          <div style="display:flex;justify-content:space-between;"><div class="skill-level">Beginner</div><div class="skill-xp">30 / 100 XP</div></div>
+        </div>
+        <div class="skill-item">
+          <div class="skill-name">Handling Q&amp;A</div>
+          <div class="progress-bar" style="margin:8px 0;"><div class="progress-fill" style="width:20%"></div></div>
+          <div style="display:flex;justify-content:space-between;"><div class="skill-level">Beginner</div><div class="skill-xp">20 / 100 XP</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Achievements -->
+    <div class="tab-panel" id="tab-achievements">
+      <div class="achievements-grid">
+        <div class="achievement">
+          <div class="achievement-icon">&#9670;</div>
+          <div class="achievement-name">First Words</div>
+          <p class="achievement-desc">Completed your very first practice session.</p>
+          <div class="badge badge-success mt-8">Earned</div>
+        </div>
+        <div class="achievement">
+          <div class="achievement-icon">&#9711;</div>
+          <div class="achievement-name">Three and Counting</div>
+          <p class="achievement-desc">Completed 3 different scenarios.</p>
+          <div class="badge badge-success mt-8">Earned</div>
+        </div>
+        <div class="achievement">
+          <div class="achievement-icon">&#9632;</div>
+          <div class="achievement-name">Five-Day Streak</div>
+          <p class="achievement-desc">Practiced five days in a row without missing a day.</p>
+          <div class="badge badge-success mt-8">Earned</div>
+        </div>
+        <div class="achievement locked">
+          <div class="achievement-icon">&#9633;</div>
+          <div class="achievement-name">Top Scorer</div>
+          <p class="achievement-desc">Achieve a 90%+ score on any scenario.</p>
+          <div class="badge badge-neutral mt-8">Locked</div>
+        </div>
+        <div class="achievement locked">
+          <div class="achievement-icon">&#9675;</div>
+          <div class="achievement-name">All Categories</div>
+          <p class="achievement-desc">Complete at least one scenario from every category.</p>
+          <div class="badge badge-neutral mt-8">Locked</div>
+        </div>
+        <div class="achievement locked">
+          <div class="achievement-icon">&#9672;</div>
+          <div class="achievement-name">Advanced Speaker</div>
+          <p class="achievement-desc">Complete an Advanced-level scenario with a passing score.</p>
+          <div class="badge badge-neutral mt-8">Locked</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<footer>
+  <div class="footer-inner">
+    <div><div class="footer-brand">SpeakUp</div><p class="footer-tagline">AI-powered public speaking training.</p></div>
+    <div class="footer-links">
+      <a href="index.html">Home</a><a href="scenarios.html">Scenarios</a>
+      <a href="dashboard.html">Dashboard</a><a href="settings.html">Settings</a>
+    </div>
+  </div>
+  <div class="footer-bottom"><span>© 2025 SpeakUp.</span></div>
+</footer>
+
+<div class="page-scroll-btns">
+  <button class="scroll-up">&#8593;</button>
+  <button class="scroll-down">&#8595;</button>
+</div>
+
+<script src="main.js"></script>
+<script>
+  // Load user data
+  const user = Auth.getUser();
+  if (user) {
+    document.getElementById('profileAvatar').textContent = (user.name || 'U')[0].toUpperCase();
+    document.getElementById('profileName').textContent = user.name || 'User';
+    document.getElementById('profileEmail').textContent = user.email || '';
+    document.getElementById('profileLevel').textContent = (user.level || 'Beginner').charAt(0).toUpperCase() + (user.level || 'beginner').slice(1);
+    document.getElementById('editName').value = user.name || '';
+    document.getElementById('editEmail').value = user.email || '';
+    if (user.level) document.getElementById('editLevel').value = user.level;
+  }
+
+  // Edit toggle
+  let editing = false;
+  document.getElementById('editToggle').addEventListener('click', function() {
+    editing = !editing;
+    ['editName','editEmail','editLevel','editGoal','editBio'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.disabled = !editing;
+    });
+    document.getElementById('saveButtons').style.display = editing ? 'flex' : 'none';
+    this.textContent = editing ? 'Cancel' : 'Edit';
+  });
+
+  document.getElementById('cancelEdit').addEventListener('click', () => {
+    editing = false;
+    ['editName','editEmail','editLevel','editGoal','editBio'].forEach(id => {
+      const el = document.getElementById(id); if (el) el.disabled = true;
+    });
+    document.getElementById('saveButtons').style.display = 'none';
+    document.getElementById('editToggle').textContent = 'Edit';
+  });
+
+  document.getElementById('profileForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const updatedUser = { ...Auth.getUser(), name: document.getElementById('editName').value, email: document.getElementById('editEmail').value, level: document.getElementById('editLevel').value };
+    Auth.login(updatedUser);
+    document.getElementById('profileName').textContent = updatedUser.name;
+    document.getElementById('profileAvatar').textContent = (updatedUser.name || 'U')[0].toUpperCase();
+    document.getElementById('cancelEdit').click();
+    showToast('Profile updated.', 'success');
+  });
+
+  // Tabs
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+      this.classList.add('active');
+      document.getElementById('tab-' + this.dataset.tab).classList.add('active');
+    });
+  });
+</script>
+</body>
+</html>

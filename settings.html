@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Settings — SpeakUp</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%234A7899'/><text x='8' y='22' font-size='18' font-weight='900' fill='white' font-family='Helvetica'>S</text></svg>">
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .settings-layout { display: grid; grid-template-columns: 220px 1fr; gap: 0; max-width: 1000px; margin: 0 auto; padding: 40px 24px 80px; }
+    .settings-nav { padding-right: 32px; }
+    .settings-nav-label { font-size: 10px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px; }
+    .settings-link {
+      display: flex; align-items: center; gap: 10px; padding: 9px 12px;
+      border-radius: var(--radius); font-size: 13px; font-weight: 500;
+      color: var(--text-secondary); cursor: pointer; text-decoration: none;
+      transition: all 0.15s; margin-bottom: 2px; background: none; border: none;
+      width: 100%; text-align: left; font-family: Helvetica, Arial, sans-serif;
+    }
+    .settings-link:hover { background: rgba(74,120,153,0.1); color: var(--text-primary); }
+    .settings-link.active { background: rgba(74,120,153,0.18); color: var(--text-primary); border-left: 2px solid var(--sky-blue); margin-left: -2px; padding-left: 14px; }
+    .settings-divider { height: 1px; background: var(--border); margin: 14px 0; }
+
+    /* ── Settings content ── */
+    .settings-section { display: none; }
+    .settings-section.active { display: block; }
+    .settings-section-title { font-size: 1.3rem; font-weight: 700; margin-bottom: 6px; }
+    .settings-section-sub { font-size: 13px; color: var(--text-muted); margin-bottom: 28px; }
+
+    .settings-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 28px; margin-bottom: 20px; }
+    .settings-card-title { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+    .settings-card-desc { font-size: 13px; color: var(--text-muted); margin-bottom: 20px; }
+
+    /* Toggle switch */
+    .toggle-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border); }
+    .toggle-row:last-child { border-bottom: none; }
+    .toggle-info h4 { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
+    .toggle-info p { font-size: 12px; color: var(--text-muted); }
+    .toggle-switch { position: relative; width: 44px; height: 24px; flex-shrink: 0; }
+    .toggle-switch input { opacity: 0; width: 0; height: 0; }
+    .toggle-slider {
+      position: absolute; inset: 0; background: rgba(74,120,153,0.2);
+      border: 1px solid var(--border); border-radius: 12px; cursor: pointer; transition: 0.3s;
+    }
+    .toggle-slider::before {
+      content: ''; position: absolute; width: 18px; height: 18px;
+      left: 2px; top: 2px; background: var(--text-muted); border-radius: 50%; transition: 0.3s;
+    }
+    .toggle-switch input:checked + .toggle-slider { background: var(--steel-blue); border-color: var(--sky-blue); }
+    .toggle-switch input:checked + .toggle-slider::before { transform: translateX(20px); background: white; }
+
+    /* Range slider */
+    .range-row { padding: 12px 0; border-bottom: 1px solid var(--border); }
+    .range-row:last-child { border-bottom: none; }
+    .range-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .range-label { font-size: 14px; font-weight: 600; }
+    .range-value { font-size: 13px; color: var(--sky-blue); font-weight: 700; }
+    input[type="range"] {
+      width: 100%; height: 4px; background: rgba(74,120,153,0.2); border-radius: 2px;
+      outline: none; appearance: none; -webkit-appearance: none; cursor: pointer;
+    }
+    input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--sky-blue); cursor: pointer; border: 2px solid var(--bg-dark); }
+
+    /* Select group */
+    .select-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border); }
+    .select-row:last-child { border-bottom: none; }
+    .select-info h4 { font-size: 14px; font-weight: 600; }
+    .select-info p { font-size: 12px; color: var(--text-muted); }
+
+    /* ── Danger zone ── */
+    .danger-card { background: rgba(184,92,92,0.06); border: 1px solid rgba(184,92,92,0.25); border-radius: var(--radius-lg); padding: 24px; margin-top: 24px; }
+    .danger-card h3 { color: #cc8080; font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 16px; }
+
+    @media (max-width: 700px) {
+      .settings-layout { grid-template-columns: 1fr; gap: 24px; }
+      .settings-nav { padding-right: 0; display: flex; flex-wrap: wrap; gap: 4px; }
+      .settings-link { padding: 6px 12px; }
+      .settings-link.active { border-left: none; margin-left: 0; padding-left: 12px; background: rgba(74,120,153,0.2); border-bottom: 2px solid var(--sky-blue); border-radius: var(--radius-pill); }
+    }
+  </style>
+</head>
+<body>
+<div class="bg-mesh"></div>
+
+<nav class="navbar">
+  <div class="navbar-inner">
+    <a href="index.html" class="navbar-brand"><div class="brand-icon">S</div>SpeakUp</a>
+    <div class="navbar-search">
+      <span class="search-icon">&#9906;</span>
+      <input type="text" class="search-input" placeholder="Search scenarios...">
+    </div>
+    <div class="navbar-links">
+      <a href="index.html">Home</a>
+      <a href="scenarios.html">Scenarios</a>
+      <a href="dashboard.html">Dashboard</a>
+      <a href="practice.html">Practice</a>
+    </div>
+    <div class="navbar-actions nav-auth-actions">
+      <a href="login.html" class="btn btn-ghost btn-sm">Sign In</a>
+      <a href="signup.html" class="btn btn-solid btn-sm">
+        <span class="btn-neon-top"></span>Get Started<span class="btn-neon-bottom"></span>
+      </a>
+    </div>
+    <button class="navbar-toggle"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+<div class="mobile-nav">
+  <a href="index.html">Home</a>
+  <a href="scenarios.html">Scenarios</a>
+  <a href="dashboard.html">Dashboard</a>
+  <a href="practice.html">Practice</a>
+  <a href="account.html">Account</a>
+  <a href="map.html">Find Coach</a>
+
+</div>
+
+<main class="page-wrapper">
+  <div style="max-width:1000px;margin:0 auto;padding:40px 24px 16px;">
+    <div class="badge badge-neutral mb-8">Account</div>
+    <h1 style="font-size:1.8rem;margin-bottom:4px;">Settings</h1>
+    <p style="color:var(--text-muted);font-size:14px;">Manage your preferences, notifications, and account.</p>
+  </div>
+  <div class="settings-layout">
+    <!-- Nav -->
+    <nav class="settings-nav">
+      <div class="settings-nav-label">Preferences</div>
+      <button class="settings-link active" data-section="practice">Practice</button>
+      <button class="settings-link" data-section="notifications">Notifications</button>
+      <button class="settings-link" data-section="display">Display</button>
+      <div class="settings-divider"></div>
+      <div class="settings-nav-label">Account</div>
+      <a href="account.html" class="settings-link">Profile</a>
+      <button class="settings-link" data-section="security">Security</button>
+      <button class="settings-link" data-section="data">Data</button>
+    </nav>
+
+    <!-- Content -->
+    <div class="settings-content">
+
+      <!-- Practice -->
+      <div class="settings-section active" id="section-practice">
+        <div class="settings-section-title">Practice Settings</div>
+        <p class="settings-section-sub">Control how your practice sessions are structured and timed.</p>
+
+        <div class="settings-card">
+          <div class="settings-card-title">Session Behavior</div>
+          <p class="settings-card-desc">Configure defaults for every practice session.</p>
+          <div class="toggle-row"><div class="toggle-info"><h4>Auto-start timer</h4><p>Start the session timer automatically when you begin typing.</p></div><label class="toggle-switch"><input type="checkbox" id="autoTimer"><span class="toggle-slider"></span></label></div>
+          <div class="toggle-row"><div class="toggle-info"><h4>Show structure guide</h4><p>Display the step-by-step guide during sessions.</p></div><label class="toggle-switch"><input type="checkbox" id="showGuide" checked><span class="toggle-slider"></span></label></div>
+          <div class="toggle-row"><div class="toggle-info"><h4>Word count indicator</h4><p>Show real-time word count while writing.</p></div><label class="toggle-switch"><input type="checkbox" id="wordCountToggle" checked><span class="toggle-slider"></span></label></div>
+          <div class="toggle-row"><div class="toggle-info"><h4>Session summaries</h4><p>Save a short summary after each session to your dashboard.</p></div><label class="toggle-switch"><input type="checkbox" id="sessionSummary" checked><span class="toggle-slider"></span></label></div>
+        </div>
+
+        <div class="settings-card">
+          <div class="settings-card-title">AI Feedback</div>
+          <p class="settings-card-desc">Adjust the depth and style of AI-generated feedback.</p>
+          <div class="range-row">
+            <div class="range-header"><span class="range-label">Feedback depth</span><span class="range-value" id="depthVal">Balanced</span></div>
+            <input type="range" min="1" max="3" value="2" id="feedbackDepth">
+            <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text-muted);margin-top:4px;"><span>Brief</span><span>Balanced</span><span>Detailed</span></div>
+          </div>
+          <div class="range-row">
+            <div class="range-header"><span class="range-label">Strictness level</span><span class="range-value" id="strictVal">Medium</span></div>
+            <input type="range" min="1" max="3" value="2" id="strictness">
+            <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text-muted);margin-top:4px;"><span>Encouraging</span><span>Balanced</span><span>Critical</span></div>
+          </div>
+        </div>
+
+        <div class="settings-card">
+          <div class="settings-card-title">Default Difficulty</div>
+          <p class="settings-card-desc">Choose the default scenario difficulty level shown when you browse.</p>
+          <div class="select-row">
+            <div class="select-info"><h4>Difficulty filter</h4><p>Used when opening the Scenarios page.</p></div>
+            <select class="form-input" style="width:160px;" id="defaultDifficulty">
+              <option value="all">All Levels</option>
+              <option value="beginner" selected>Beginner</option>
+              <option value="intermediate">Intermediate</option>
+              <option value="advanced">Advanced</option>
+            </select>
+          </div>
+        </div>
+
+        <button class="btn btn-solid" onclick="saveSettings()">
+          <span class="btn-neon-top"></span>Save Changes<span class="btn-neon-bottom"></span>
+        </button>
+      </div>
+
+      <!-- Notifications -->
+      <div class="settings-section" id="section-notifications">
+        <div class="settings-section-title">Notifications</div>
+        <p class="settings-section-sub">Choose what you hear from us and how often.</p>
+        <div class="settings-card">
+          <div class="settings-card-title">Email Notifications</div>
+          <p class="settings-card-desc">Emails sent to your registered address.</p>
+          <div class="toggle-row"><div class="toggle-info"><h4>Practice reminders</h4><p>Daily reminder to keep your streak alive.</p></div><label class="toggle-switch"><input type="checkbox" checked><span class="toggle-slider"></span></label></div>
+          <div class="toggle-row"><div class="toggle-info"><h4>Weekly progress report</h4><p>A summary of your sessions and scores each week.</p></div><label class="toggle-switch"><input type="checkbox" checked><span class="toggle-slider"></span></label></div>
+          <div class="toggle-row"><div class="toggle-info"><h4>New scenarios</h4><p>Notify me when new practice scenarios are added.</p></div><label class="toggle-switch"><input type="checkbox"><span class="toggle-slider"></span></label></div>
+          <div class="toggle-row"><div class="toggle-info"><h4>Product updates</h4><p>Announcements about new features and changes.</p></div><label class="toggle-switch"><input type="checkbox"><span class="toggle-slider"></span></label></div>
+        </div>
+        <button class="btn btn-solid" onclick="saveSettings()">
+          <span class="btn-neon-top"></span>Save Changes<span class="btn-neon-bottom"></span>
+        </button>
+      </div>
+
+      <!-- Display -->
+      <div class="settings-section" id="section-display">
+        <div class="settings-section-title">Display</div>
+        <p class="settings-section-sub">Adjust how the interface looks and behaves.</p>
+        <div class="settings-card">
+          <div class="settings-card-title">Appearance</div>
+          <p class="settings-card-desc">All display options. SpeakUp is a dark-mode application.</p>
+          <div class="range-row">
+            <div class="range-header"><span class="range-label">Font size</span><span class="range-value" id="fontVal">Medium</span></div>
+            <input type="range" min="1" max="3" value="2" id="fontSize">
+            <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text-muted);margin-top:4px;"><span>Small</span><span>Medium</span><span>Large</span></div>
+          </div>
+          <div class="toggle-row"><div class="toggle-info"><h4>Reduced motion</h4><p>Disable sparkle animations and transitions.</p></div><label class="toggle-switch"><input type="checkbox" id="reducedMotion"><span class="toggle-slider"></span></label></div>
+          <div class="toggle-row"><div class="toggle-info"><h4>Compact layout</h4><p>Show more content on screen with reduced spacing.</p></div><label class="toggle-switch"><input type="checkbox"><span class="toggle-slider"></span></label></div>
+        </div>
+        <button class="btn btn-solid" onclick="saveSettings()">
+          <span class="btn-neon-top"></span>Save Changes<span class="btn-neon-bottom"></span>
+        </button>
+      </div>
+
+      <!-- Security -->
+      <div class="settings-section" id="section-security">
+        <div class="settings-section-title">Security</div>
+        <p class="settings-section-sub">Manage your password and authentication options.</p>
+        <div class="settings-card">
+          <div class="settings-card-title">Change Password</div>
+          <p class="settings-card-desc">We recommend using a unique password of at least 12 characters.</p>
+          <div class="form-group"><label class="form-label">Current Password</label><input type="password" class="form-input" placeholder="Your current password"></div>
+          <div class="form-group"><label class="form-label">New Password</label><input type="password" class="form-input" placeholder="Minimum 8 characters"></div>
+          <div class="form-group"><label class="form-label">Confirm New Password</label><input type="password" class="form-input" placeholder="Repeat new password"></div>
+          <button class="btn btn-solid" onclick="showToast('Password updated.','success')">
+            <span class="btn-neon-top"></span>Update Password<span class="btn-neon-bottom"></span>
+          </button>
+        </div>
+        <div class="settings-card">
+          <div class="settings-card-title">Sessions</div>
+          <p class="settings-card-desc">Manage where you are signed in.</p>
+          <div class="toggle-row">
+            <div class="toggle-info"><h4>Current browser session</h4><p>Active now</p></div>
+            <span class="badge badge-success">Active</span>
+          </div>
+          <div style="margin-top:16px;">
+            <button class="btn btn-outline btn-sm" onclick="showToast('All other sessions signed out.','success')">
+              <span class="btn-neon-top"></span>Sign Out All Other Sessions<span class="btn-neon-bottom"></span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Data -->
+      <div class="settings-section" id="section-data">
+        <div class="settings-section-title">Data and Privacy</div>
+        <p class="settings-section-sub">Control your data, export, and account deletion.</p>
+        <div class="settings-card">
+          <div class="settings-card-title">Your Data</div>
+          <p class="settings-card-desc">Export or manage the data associated with your account.</p>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <button class="btn btn-outline" onclick="showToast('Your data export is being prepared. You will receive an email shortly.','success')">
+              <span class="btn-neon-top"></span>Export My Data<span class="btn-neon-bottom"></span>
+            </button>
+            <button class="btn btn-ghost" onclick="showToast('Session history cleared.','success')">
+              <span class="btn-neon-top"></span>Clear Session History<span class="btn-neon-bottom"></span>
+            </button>
+          </div>
+        </div>
+        <div class="danger-card">
+          <h3>Danger Zone</h3>
+          <p style="font-size:13px;color:var(--text-secondary);margin-bottom:16px;">Deleting your account is permanent and cannot be undone. All your sessions, scores, and settings will be removed immediately.</p>
+          <button class="btn btn-outline" style="border-color:rgba(184,92,92,0.4);color:#cc8080;" onclick="if(confirm('Are you sure? This cannot be undone.')) { Auth.logout(); }">
+            <span class="btn-neon-top"></span>Delete Account<span class="btn-neon-bottom"></span>
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</main>
+
+<footer>
+  <div class="footer-inner">
+    <div><div class="footer-brand">SpeakUp</div><p class="footer-tagline">AI-powered public speaking training.</p></div>
+    <div class="footer-links">
+      <a href="index.html">Home</a><a href="scenarios.html">Scenarios</a>
+      <a href="dashboard.html">Dashboard</a><a href="account.html">Account</a>
+    </div>
+  </div>
+  <div class="footer-bottom"><span>© 2025 SpeakUp.</span></div>
+</footer>
+
+<div class="page-scroll-btns">
+  <button class="scroll-up">&#8593;</button>
+  <button class="scroll-down">&#8595;</button>
+</div>
+
+<script src="main.js"></script>
+<script>
+  // Section navigation
+  document.querySelectorAll('.settings-link[data-section]').forEach(btn => {
+    btn.addEventListener('click', function() {
+      document.querySelectorAll('.settings-link').forEach(l => l.classList.remove('active'));
+      document.querySelectorAll('.settings-section').forEach(s => s.classList.remove('active'));
+      this.classList.add('active');
+      document.getElementById('section-' + this.dataset.section).classList.add('active');
+    });
+  });
+
+  // Range labels
+  const depthLabels = ['','Brief','Balanced','Detailed'];
+  const strictLabels = ['','Encouraging','Balanced','Critical'];
+  const fontLabels = ['','Small','Medium','Large'];
+
+  document.getElementById('feedbackDepth')?.addEventListener('input', function() { document.getElementById('depthVal').textContent = depthLabels[this.value]; });
+  document.getElementById('strictness')?.addEventListener('input', function() { document.getElementById('strictVal').textContent = strictLabels[this.value]; });
+  document.getElementById('fontSize')?.addEventListener('input', function() { document.getElementById('fontVal').textContent = fontLabels[this.value]; });
+
+  function saveSettings() { showToast('Settings saved.', 'success'); }
+</script>
+</body>
+</html>

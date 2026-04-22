@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign In — SpeakUp</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%234A7899'/><text x='8' y='22' font-size='18' font-weight='900' fill='white' font-family='Helvetica'>S</text></svg>">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="accessibility.css">
+  <link rel="stylesheet" href="captcha.css">
+  <style>
+    .auth-page {
+      min-height: 100vh; display: flex; align-items: center; justify-content: center;
+      padding: 80px 24px 40px;
+    }
+    .auth-layout {
+      display: grid; grid-template-columns: 1fr 480px; gap: 80px;
+      max-width: 960px; width: 100%; align-items: center;
+    }
+    
+    .auth-left .eyebrow {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(74,120,153,0.12); border: 1px solid rgba(122,175,197,0.2);
+      border-radius: 999px; padding: 5px 14px; font-size: 11px;
+      font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--sky-blue); margin-bottom: 20px;
+    }
+    .auth-left h1 { font-size: clamp(1.8rem, 4vw, 2.8rem); margin-bottom: 16px; }
+    .auth-left p { font-size: 15px; color: var(--text-secondary); line-height: 1.7; margin-bottom: 32px; }
+    .auth-points { display: flex; flex-direction: column; gap: 12px; }
+    .auth-point { display: flex; align-items: center; gap: 12px; }
+    .auth-point-dot {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: rgba(74,120,153,0.15); border: 1px solid rgba(122,175,197,0.2);
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+      font-size: 12px;
+    }
+    .auth-point span { font-size: 14px; color: var(--text-secondary); }
+
+    .auth-card {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); padding: 40px;
+    }
+    .auth-card-header { margin-bottom: 28px; }
+    .auth-card-header h2 { font-size: 1.4rem; margin-bottom: 6px; }
+    .auth-card-header p { font-size: 13px; color: var(--text-muted); }
+    .auth-footer { margin-top: 20px; text-align: center; font-size: 13px; color: var(--text-muted); }
+    .auth-footer a { color: var(--accent); }
+    .auth-footer a:hover { color: var(--accent-hover); }
+
+    .password-wrapper { position: relative; }
+    .password-toggle {
+      position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+      background: none; border: none; cursor: pointer; color: var(--text-muted);
+      font-size: 12px; font-family: Helvetica, Arial, sans-serif; letter-spacing: 0.06em;
+      padding: 4px 8px; text-transform: uppercase;
+    }
+    .password-toggle:hover { color: var(--text-secondary); }
+
+    .form-options { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .checkbox-group { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-secondary); }
+    .checkbox-group input { accent-color: var(--steel-blue); }
+
+    @media (max-width: 768px) {
+      .auth-layout { grid-template-columns: 1fr; gap: 40px; }
+      .auth-left { order: 2; display: none; }
+      .auth-card { order: 1; padding: 28px 24px; }
+    }
+  </style>
+</head>
+<body>
+<div class="bg-mesh"></div>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <div class="navbar-inner">
+    <a href="index.html" class="navbar-brand">
+      <div class="brand-icon">S</div>
+      SpeakUp
+    </a>
+    <div class="navbar-search">
+      <span class="search-icon">&#9906;</span>
+      <input type="text" class="search-input" placeholder="Search scenarios...">
+    </div>
+    <div class="navbar-links">
+      <a href="index.html">Home</a>
+      <a href="scenarios.html">Scenarios</a>
+      <a href="dashboard.html">Dashboard</a>
+      <a href="practice.html">Practice</a>
+      <a href="map.html">Find Coach</a>
+    </div>
+    <div class="navbar-actions nav-auth-actions">
+      <a href="login.html" class="btn btn-ghost btn-sm active">Sign In</a>
+      <a href="signup.html" class="btn btn-solid btn-sm">
+        <span class="btn-neon-top"></span>Get Started<span class="btn-neon-bottom"></span>
+      </a>
+    </div>
+    <button class="navbar-toggle"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+<div class="mobile-nav">
+  <a href="index.html">Home</a>
+  <a href="scenarios.html">Scenarios</a>
+  <a href="dashboard.html">Dashboard</a>
+  <a href="practice.html">Practice</a>
+  <a href="signup.html">Sign Up</a>
+</div>
+
+<main class="page-wrapper">
+  <div class="auth-page">
+    <div class="auth-layout">
+      <div class="auth-left fade-up">
+        <div class="eyebrow">Welcome back</div>
+        <h1>Continue Your Speaking Journey</h1>
+        <p>Your practice history, feedback, and progress are waiting for you. Sign in to pick up exactly where you left off.</p>
+        <div class="auth-points">
+          <div class="auth-point"><div class="auth-point-dot">&#9670;</div><span>Access all 24+ practice scenarios</span></div>
+          <div class="auth-point"><div class="auth-point-dot">&#9711;</div><span>Review your AI feedback history</span></div>
+          <div class="auth-point"><div class="auth-point-dot">&#9632;</div><span>Track progress across all sessions</span></div>
+          <div class="auth-point"><div class="auth-point-dot">&#9675;</div><span>Continue incomplete sessions</span></div>
+        </div>
+      </div>
+
+      <div class="auth-card fade-up-delay-1">
+        <div class="auth-card-header">
+          <h2>Sign In</h2>
+          <p>Enter your credentials to access your account</p>
+        </div>
+
+        <form id="loginForm" novalidate>
+          <div class="form-group">
+            <label class="form-label" for="email">Email Address</label>
+            <input type="email" id="email" class="form-input" placeholder="you@example.com" autocomplete="email">
+            <div class="form-error hidden" id="emailError">Please enter a valid email.</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="password">Password</label>
+            <div class="password-wrapper">
+              <input type="password" id="password" class="form-input" placeholder="Enter your password" autocomplete="current-password" style="padding-right:60px;">
+              <button type="button" class="password-toggle" id="pwToggle">Show</button>
+            </div>
+            <div class="form-error hidden" id="passwordError">Password is required.</div>
+          </div>
+          <div class="form-options">
+            <label class="checkbox-group">
+              <input type="checkbox" id="rememberMe"> Remember me
+            </label>
+            <a href="#" style="font-size:13px;color:var(--text-muted);">Forgot password?</a>
+          </div>
+          <div id="login-captcha-container"></div>
+          <button type="submit" class="btn btn-solid w-full" style="width:100%;justify-content:center;">
+            <span class="btn-neon-top"></span>Sign In<span class="btn-neon-bottom"></span>
+          </button>
+        </form>
+
+        <div class="divider-text mt-24">or continue with</div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px;">
+          <button class="btn btn-outline" onclick="showToast('Google sign-in coming soon', 'default')">
+            <span class="btn-neon-top"></span>Google<span class="btn-neon-bottom"></span>
+          </button>
+          <button class="btn btn-outline" onclick="showToast('GitHub sign-in coming soon', 'default')">
+            <span class="btn-neon-top"></span>GitHub<span class="btn-neon-bottom"></span>
+          </button>
+        </div>
+
+        <p class="auth-footer mt-24">
+          New to SpeakUp? <a href="signup.html">Create a free account</a>
+        </p>
+      </div>
+    </div>
+  </div>
+</main>
+
+<div class="page-scroll-btns">
+  <button class="scroll-up">&#8593;</button>
+  <button class="scroll-down">&#8595;</button>
+</div>
+<script src="main.js"></script>
+<script>
+  document.getElementById('pwToggle').addEventListener('click', function() {
+    const pw = document.getElementById('password');
+    if (pw.type === 'password') { pw.type = 'text'; this.textContent = 'Hide'; }
+    else { pw.type = 'password'; this.textContent = 'Show'; }
+  });
+
+  // Init captcha
+  window.addEventListener('load', () => initCaptcha('login-captcha-container'));
+
+  document.getElementById('loginForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+    let valid = true;
+
+    document.getElementById('emailError').classList.add('hidden');
+    document.getElementById('passwordError').classList.add('hidden');
+
+    if (!email || !/\S+@\S+\.\S+/.test(email)) {
+      document.getElementById('emailError').classList.remove('hidden');
+      valid = false;
+    }
+    if (!password) {
+      document.getElementById('passwordError').classList.remove('hidden');
+      valid = false;
+    }
+    if (!valid) return;
+
+    // Verify CAPTCHA
+    const captchaContainer = document.getElementById('login-captcha-container');
+    if (captchaContainer && captchaContainer._verifyCaptcha && !captchaContainer._verifyCaptcha()) return;
+
+    // Mock login
+    Auth.login({ name: email.split('@')[0], email });
+    showToast('Welcome back!', 'success');
+    setTimeout(() => window.location.href = 'dashboard.html', 800);
+  });
+</script>
+<script src="a11y.js"></script>
+<script src="captcha.js"></script>
+<script src="ai-coach.js"></script>
+</body>
+</html>

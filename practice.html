@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Practice — SpeakUp</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%234A7899'/><text x='8' y='22' font-size='18' font-weight='900' fill='white' font-family='Helvetica'>S</text></svg>">
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .practice-layout {
+      display: grid; grid-template-columns: 1fr 380px; gap: 24px;
+      max-width: 1200px; margin: 0 auto; padding: 40px 24px 80px; min-height: calc(100vh - 64px);
+    }
+
+    /* ── Left: Practice area ── */
+    .scenario-banner {
+      background: linear-gradient(135deg, var(--bg-card), rgba(74,120,153,0.15));
+      border: 1px solid var(--border); border-radius: var(--radius-lg);
+      padding: 28px 32px; margin-bottom: 24px; position: relative; overflow: hidden;
+    }
+    .scenario-banner::after {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+      background: linear-gradient(90deg, transparent, var(--sky-blue), transparent);
+      opacity: 0.5;
+    }
+    .scenario-banner-top { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px; margin-bottom: 16px; }
+    .scenario-name { font-size: 1.4rem; font-weight: 700; }
+    .scenario-desc { font-size: 14px; color: var(--text-secondary); line-height: 1.65; }
+
+    /* ── Guide panel ── */
+    .guide-section { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 24px; margin-bottom: 24px; }
+    .guide-section h3 { font-size: 14px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 16px; color: var(--text-secondary); }
+    .guide-steps { display: flex; flex-direction: column; gap: 14px; }
+    .guide-step { display: flex; gap: 14px; align-items: flex-start; }
+    .guide-step-num {
+      width: 26px; height: 26px; border-radius: 50%; background: rgba(74,120,153,0.15);
+      border: 1px solid rgba(122,175,197,0.25); display: flex; align-items: center;
+      justify-content: center; font-size: 11px; font-weight: 700; font-family: 'Space Mono', monospace;
+      color: var(--sky-blue); flex-shrink: 0;
+    }
+    .guide-step-content h4 { font-size: 13px; font-weight: 700; margin-bottom: 3px; }
+    .guide-step-content p { font-size: 12px; color: var(--text-muted); line-height: 1.55; }
+
+    /* ── Timer ── */
+    .timer-display {
+      text-align: center; padding: 20px;
+      background: rgba(33,52,72,0.6); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); margin-bottom: 24px;
+    }
+    .timer-num { font-size: 3rem; font-weight: 700; font-family: 'Space Mono', monospace; color: var(--text-primary); letter-spacing: 0.05em; }
+    .timer-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 16px; }
+    .timer-controls { display: flex; gap: 10px; justify-content: center; }
+    .timer-bar { height: 3px; background: rgba(74,120,153,0.2); border-radius: 2px; margin: 16px 0 0; overflow: hidden; }
+    .timer-fill { height: 100%; background: linear-gradient(90deg, var(--steel-blue), var(--sky-blue)); border-radius: 2px; transition: width 1s linear; }
+
+    /* ── Text input area ── */
+    .input-section { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 24px; margin-bottom: 24px; }
+    .input-section h3 { font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-secondary); margin-bottom: 12px; }
+    .speech-textarea {
+      width: 100%; min-height: 160px; background: rgba(74,120,153,0.06);
+      border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 14px 16px; color: var(--text-primary); font-family: Helvetica, Arial, sans-serif;
+      font-size: 14px; line-height: 1.7; outline: none; resize: vertical;
+      transition: border-color 0.2s;
+    }
+    .speech-textarea:focus { border-color: var(--sky-blue); background: rgba(74,120,153,0.1); }
+    .speech-textarea::placeholder { color: var(--text-muted); }
+    .word-count { font-size: 11px; color: var(--text-muted); margin-top: 6px; text-align: right; }
+    .input-actions { display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
+
+
+    .feedback-card h3 { font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-secondary); margin-bottom: 16px; }
+
+    /* Score ring */
+    .score-ring { display: flex; flex-direction: column; align-items: center; margin-bottom: 20px; }
+    .ring-svg { transform: rotate(-90deg); }
+    .ring-bg { fill: none; stroke: rgba(74,120,153,0.2); stroke-width: 8; }
+    .ring-fill { fill: none; stroke: url(#ringGrad); stroke-width: 8; stroke-linecap: round; stroke-dasharray: 251.2; stroke-dashoffset: 251.2; transition: stroke-dashoffset 1s ease; }
+    .score-value { font-size: 2.2rem; font-weight: 700; font-family: 'Space Mono', monospace; margin-top: 8px; }
+    .score-label { font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; }
+
+    /* Feedback metrics */
+    .metric-row { margin-bottom: 14px; }
+    .metric-label { display: flex; justify-content: space-between; font-size: 12px; font-weight: 600; margin-bottom: 5px; }
+    .metric-label span:last-child { color: var(--sky-blue); font-family: 'Space Mono', monospace; }
+    .metric-bar { height: 5px; background: rgba(74,120,153,0.15); border-radius: 3px; overflow: hidden; }
+    .metric-fill { height: 100%; background: linear-gradient(90deg, var(--steel-blue), var(--sky-blue)); border-radius: 3px; }
+
+    /* Feedback comments */
+    .feedback-comment { background: rgba(74,120,153,0.06); border-left: 2px solid var(--sky-blue); border-radius: 0 var(--radius) var(--radius) 0; padding: 10px 14px; margin-bottom: 10px; font-size: 13px; color: var(--text-secondary); line-height: 1.6; }
+    .feedback-placeholder { text-align: center; padding: 32px 16px; color: var(--text-muted); font-size: 13px; }
+
+    /* ── Orbital decoration ── */
+    .orbital-small {
+      width: 120px; height: 120px; border-radius: 50%;
+      border: 1px solid rgba(74,120,153,0.15);
+      position: absolute; top: -30px; right: -30px;
+      animation: orbit-spin 15s linear infinite; pointer-events: none;
+    }
+
+    @media (max-width: 900px) {
+      .practice-layout { grid-template-columns: 1fr; padding: 24px 16px; }
+      .practice-sidebar { order: -1; }
+    }
+  </style>
+</head>
+<body>
+<div class="bg-mesh"></div>
+
+<nav class="navbar">
+  <div class="navbar-inner">
+    <a href="index.html" class="navbar-brand"><div class="brand-icon">S</div>SpeakUp</a>
+    <div class="navbar-search">
+      <span class="search-icon">&#9906;</span>
+      <input type="text" class="search-input" placeholder="Search scenarios...">
+    </div>
+    <div class="navbar-links">
+      <a href="index.html">Home</a>
+      <a href="scenarios.html">Scenarios</a>
+      <a href="dashboard.html">Dashboard</a>
+      <a href="practice.html" class="active">Practice</a>
+      <a href="map.html">Find Coach</a>
+
+    </div>
+    <div class="navbar-actions nav-auth-actions">
+      <a href="login.html" class="btn btn-ghost btn-sm">Sign In</a>
+      <a href="signup.html" class="btn btn-solid btn-sm">
+        <span class="btn-neon-top"></span>Get Started<span class="btn-neon-bottom"></span>
+      </a>
+    </div>
+    <button class="navbar-toggle"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+<div class="mobile-nav">
+  <a href="index.html">Home</a>
+  <a href="scenarios.html">Scenarios</a>
+  <a href="dashboard.html">Dashboard</a>
+  <a href="practice.html" class="active">Practice</a>
+  <a href="account.html">Account</a>
+</div>
+
+<main class="page-wrapper">
+  <div class="practice-layout">
+    <!-- Left: Main practice -->
+    <div class="practice-main">
+      <!-- Scenario banner -->
+      <div class="scenario-banner">
+        <div class="orbital-small"></div>
+        <div class="scenario-banner-top">
+          <div>
+            <div class="badge badge-default mb-8" id="scenarioCategory">Professional</div>
+            <div class="scenario-name" id="scenarioName">Team Meeting Update</div>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <span class="badge badge-warning" id="scenarioDifficulty">Intermediate</span>
+            <span class="badge badge-neutral" id="scenarioDuration">3 min</span>
+          </div>
+        </div>
+        <p class="scenario-desc" id="scenarioDesc">Give a concise project status update to your team, covering progress, blockers, and next steps in under 3 minutes.</p>
+        <div class="mt-12" style="display:flex;gap:8px;flex-wrap:wrap;">
+          <a href="scenarios.html" class="btn btn-ghost btn-sm">
+            <span class="btn-neon-top"></span>Change Scenario<span class="btn-neon-bottom"></span>
+          </a>
+          <button class="btn btn-outline btn-sm" id="shuffleBtn">
+            <span class="btn-neon-top"></span>Shuffle<span class="btn-neon-bottom"></span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Timer -->
+      <div class="timer-display">
+        <div class="timer-label">Session Timer</div>
+        <div class="timer-num" id="timerDisplay">0:00</div>
+        <div class="timer-bar"><div class="timer-fill" id="timerFill" style="width:0%"></div></div>
+        <div class="timer-controls mt-16">
+          <button class="btn btn-solid" id="timerStart">
+            <span class="btn-neon-top"></span>Start<span class="btn-neon-bottom"></span>
+          </button>
+          <button class="btn btn-outline" id="timerPause" disabled>
+            <span class="btn-neon-top"></span>Pause<span class="btn-neon-bottom"></span>
+          </button>
+          <button class="btn btn-ghost" id="timerReset">
+            <span class="btn-neon-top"></span>Reset<span class="btn-neon-bottom"></span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Guide -->
+      <div class="guide-section">
+        <h3>Structure Guide</h3>
+        <div class="guide-steps">
+          <div class="guide-step">
+            <div class="guide-step-num">1</div>
+            <div class="guide-step-content">
+              <h4>Opening Hook (30 sec)</h4>
+              <p>Start with the single most important point. State the current project status in one clear sentence before providing any background.</p>
+            </div>
+          </div>
+          <div class="guide-step">
+            <div class="guide-step-num">2</div>
+            <div class="guide-step-content">
+              <h4>Progress Summary (1 min)</h4>
+              <p>What has been completed since the last meeting? Be specific with milestones. Use numbers where possible — percentages, dates, deliverables.</p>
+            </div>
+          </div>
+          <div class="guide-step">
+            <div class="guide-step-num">3</div>
+            <div class="guide-step-content">
+              <h4>Blockers and Risks (45 sec)</h4>
+              <p>Name any obstacles honestly. For each blocker, briefly suggest what you need from the team or leadership to resolve it.</p>
+            </div>
+          </div>
+          <div class="guide-step">
+            <div class="guide-step-num">4</div>
+            <div class="guide-step-content">
+              <h4>Next Steps (45 sec)</h4>
+              <p>List 2-3 concrete actions planned for the coming days. Assign ownership if speaking on behalf of a team.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Input area -->
+      <div class="input-section">
+        <h3>Your Response</h3>
+        <p style="font-size:13px;color:var(--text-muted);margin-bottom:14px;">Write or paste your speech below. Use the guide above to structure your response before submitting for AI feedback.</p>
+        <textarea class="speech-textarea" id="speechText" placeholder="Begin typing your speech here. Follow the structure guide on the left. Take your time — there is no rush."></textarea>
+        <div class="word-count"><span id="wordCount">0</span> words</div>
+        <div class="input-actions">
+          <button class="btn btn-solid" id="submitBtn">
+            <span class="btn-neon-top"></span>Submit for Feedback<span class="btn-neon-bottom"></span>
+          </button>
+          <button class="btn btn-outline" id="clearBtn">
+            <span class="btn-neon-top"></span>Clear<span class="btn-neon-bottom"></span>
+          </button>
+          <button class="btn btn-ghost" id="exampleBtn">
+            <span class="btn-neon-top"></span>Load Example<span class="btn-neon-bottom"></span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: Feedback -->
+    <div class="practice-sidebar">
+      <!-- Score -->
+      <div class="feedback-card">
+        <h3>Session Score</h3>
+        <div class="score-ring">
+          <svg width="110" height="110" class="ring-svg">
+            <defs>
+              <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" style="stop-color:#4A7899"/>
+                <stop offset="100%" style="stop-color:#7aafc5"/>
+              </linearGradient>
+            </defs>
+            <circle class="ring-bg" cx="55" cy="55" r="40"/>
+            <circle class="ring-fill" id="scoreRing" cx="55" cy="55" r="40"/>
+          </svg>
+          <div class="score-value" id="scoreValue">--</div>
+          <div class="score-label">Overall Score</div>
+        </div>
+        <div id="metricsSection">
+          <div class="feedback-placeholder">Submit your speech to see your score and detailed metrics.</div>
+        </div>
+      </div>
+
+      <!-- Feedback comments -->
+      <div class="feedback-card">
+        <h3>AI Feedback</h3>
+        <div id="feedbackComments">
+          <div class="feedback-placeholder">Your personalized feedback will appear here after you submit your speech.</div>
+        </div>
+      </div>
+
+      <!-- Tips -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-subtitle">General Tips</div>
+          <div class="card-title">Speaking Fundamentals</div>
+        </div>
+        <div class="card-body" style="display:flex;flex-direction:column;gap:10px;">
+          <div class="feedback-comment">Pause intentionally. Silence is not weakness — it signals confidence and gives the audience time to absorb what you said.</div>
+          <div class="feedback-comment">Use concrete nouns and active verbs. Vague language dilutes impact. "We shipped the dashboard" beats "there has been progress."</div>
+          <div class="feedback-comment">End with a clear, single ask or takeaway. Never let your audience wonder what you want them to do next.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<div class="page-scroll-btns">
+  <button class="scroll-up">&#8593;</button>
+  <button class="scroll-down">&#8595;</button>
+</div>
+
+<script src="main.js"></script>
+<script>
+// ── Load scenario from URL ──
+const SCENARIO_DATA = {
+  'class-presentation': { name:'Class Presentation', category:'Academic', difficulty:'Beginner', duration:'5 min', desc:'Present a 5-minute research summary to an academic audience. Focus on clear structure and supporting evidence.', guide:[{title:'Introduction (30 sec)',text:'State your topic and why it matters. Hook the audience with a surprising fact or question.'},{title:'Background (1 min)',text:'Provide necessary context. What problem are you addressing? What prior research exists?'},{title:'Main Findings (2 min)',text:'Present your 2-3 key findings clearly. Use simple language and explain any technical terms.'},{title:'Conclusion (1 min)',text:'Summarize your findings and state the implications. What should the audience take away?'},{title:'Q&A Prep (30 sec)',text:'Anticipate the one question most likely to be asked and have a concise answer ready.'}]},
+  'wedding-toast': { name:'Wedding Toast', category:'Social', difficulty:'Beginner', duration:'2 min', desc:'Deliver a heartfelt 2-minute toast balancing warmth, humor, and brevity before a crowd of friends and family.', guide:[{title:'Open with a story (30 sec)',text:'Share one specific memory of the couple or the person being toasted. Be vivid and brief.'},{title:'Express the connection (30 sec)',text:'Why are you the right person to give this toast? What does this person mean to you?'},{title:'Speak to their future (30 sec)',text:'Offer a sincere and specific wish for their journey ahead.'},{title:'Raise the glass (30 sec)',text:'Close with a clear, short, memorable line. Make it easy for everyone to respond.'}]},
+  'team-meeting': { name:'Team Meeting Update', category:'Professional', difficulty:'Intermediate', duration:'3 min', desc:'Give a concise project status update to your team, covering progress, blockers, and next steps.', guide:[{title:'Opening Hook (30 sec)',text:'State the current project status in one clear sentence before any background.'},{title:'Progress Summary (1 min)',text:'What milestones were completed? Use numbers, percentages, and dates where possible.'},{title:'Blockers and Risks (45 sec)',text:'Name any obstacles honestly. For each one, state what you need to resolve it.'},{title:'Next Steps (45 sec)',text:'List 2-3 concrete actions planned. Assign ownership if speaking for a team.'}]},
+  'elevator-pitch': { name:'Elevator Pitch', category:'Professional', difficulty:'Intermediate', duration:'1 min', desc:'Pitch your idea, product, or yourself clearly in 60 seconds to a potential partner or investor.', guide:[{title:'The Hook (10 sec)',text:'Lead with the problem you solve, not what you do. Make the listener say "tell me more."'},{title:'The Solution (20 sec)',text:'What do you offer and how does it work, in plain language? Avoid jargon.'},{title:'The Traction (15 sec)',text:'One number, one result, one proof that this is real and working.'},{title:'The Ask (15 sec)',text:'What do you want from this specific person? Be direct and specific.'}]},
+  'job-interview': { name:'Job Interview', category:'Professional', difficulty:'Intermediate', duration:'5-10 min', desc:'Practice behavioral questions using the STAR framework. Stay focused, specific, and authentic.', guide:[{title:'Situation (20 sec)',text:'Briefly set the scene. What was the context and what was at stake?'},{title:'Task (20 sec)',text:'What was your specific responsibility in that situation?'},{title:'Action (90 sec)',text:'Describe what YOU did. Use "I" not "we." Be specific about your steps and reasoning.'},{title:'Result (30 sec)',text:'What was the measurable outcome? Quantify where possible. What did you learn?'}]},
+  'ted-talk': { name:'TED-Style Talk', category:'Advanced', difficulty:'Advanced', duration:'10 min', desc:'Share one compelling idea in 10 minutes. Build a narrative from hook to call-to-action.', guide:[{title:'The Idea Worth Spreading (1 min)',text:'State your core idea in one sentence. Everything else serves this idea.'},{title:'Opening Story (2 min)',text:'Start with a personal story that illustrates the problem or tension your idea resolves.'},{title:'The Core Argument (5 min)',text:'Build your case through 3 supporting points. Use data, anecdotes, and contrast.'},{title:'The Turn (1 min)',text:'Challenge the audience\'s existing assumption. This is the emotional peak of your talk.'},{title:'Call to Action (1 min)',text:'Tell the audience exactly what you want them to think, feel, or do differently.'}]},
+};
+
+const urlParams = new URLSearchParams(window.location.search);
+const scenarioId = urlParams.get('s') || 'team-meeting';
+const scenario = SCENARIO_DATA[scenarioId] || SCENARIO_DATA['team-meeting'];
+
+// Apply scenario
+document.getElementById('scenarioName').textContent = scenario.name;
+document.getElementById('scenarioCategory').textContent = scenario.category;
+document.getElementById('scenarioDifficulty').textContent = scenario.difficulty;
+document.getElementById('scenarioDuration').textContent = scenario.duration;
+document.getElementById('scenarioDesc').textContent = scenario.desc;
+
+// Render guide
+const guideHtml = scenario.guide.map((step, i) => `
+  <div class="guide-step">
+    <div class="guide-step-num">${i+1}</div>
+    <div class="guide-step-content">
+      <h4>${step.title}</h4>
+      <p>${step.text}</p>
+    </div>
+  </div>
+`).join('');
+document.querySelector('.guide-steps').innerHTML = guideHtml;
+
+// ── Timer ──
+let timerSeconds = 0, timerInterval = null, timerRunning = false;
+const maxSecs = parseInt(scenario.duration) * 60 || 180;
+const display = document.getElementById('timerDisplay');
+const fill = document.getElementById('timerFill');
+
+function updateTimerDisplay() {
+  const m = Math.floor(timerSeconds / 60), s = timerSeconds % 60;
+  display.textContent = m + ':' + String(s).padStart(2,'0');
+  fill.style.width = Math.min((timerSeconds / maxSecs) * 100, 100) + '%';
+  if (timerSeconds >= maxSecs) { fill.style.background = 'var(--warning)'; }
+}
+
+document.getElementById('timerStart').addEventListener('click', function() {
+  if (timerRunning) return;
+  timerRunning = true;
+  this.disabled = true;
+  document.getElementById('timerPause').disabled = false;
+  timerInterval = setInterval(() => { timerSeconds++; updateTimerDisplay(); }, 1000);
+});
+document.getElementById('timerPause').addEventListener('click', function() {
+  clearInterval(timerInterval); timerRunning = false;
+  document.getElementById('timerStart').disabled = false;
+  this.disabled = true;
+});
+document.getElementById('timerReset').addEventListener('click', () => {
+  clearInterval(timerInterval); timerRunning = false; timerSeconds = 0;
+  updateTimerDisplay(); fill.style.background = '';
+  document.getElementById('timerStart').disabled = false;
+  document.getElementById('timerPause').disabled = true;
+});
+
+// ── Word count ──
+document.getElementById('speechText').addEventListener('input', function() {
+  const words = this.value.trim() ? this.value.trim().split(/\s+/).length : 0;
+  document.getElementById('wordCount').textContent = words;
+});
+
+// ── Clear / Example ──
+document.getElementById('clearBtn').addEventListener('click', () => {
+  document.getElementById('speechText').value = '';
+  document.getElementById('wordCount').textContent = '0';
+});
+document.getElementById('exampleBtn').addEventListener('click', () => {
+  const examples = {
+    'team-meeting': "Good morning, everyone. I want to start with the headline: we are on track to deliver the core feature by Friday.\n\nThis week, the team completed the authentication module and finished 80% of the API integration. We resolved the database latency issue that was blocking us last sprint — that is now closed.\n\nOur current blocker is the third-party analytics SDK, which has a compatibility issue with our mobile build. I have raised a ticket and we expect a patch by Wednesday. I will need Jordan to pause the dashboard work briefly to assist if the patch does not arrive on time.\n\nFor next steps: we will complete the API integration by Tuesday, conduct internal QA from Wednesday to Thursday, and submit to staging on Friday. That is the update. Any questions?",
+    'default': "Thank you for the opportunity to speak today.\n\nI want to begin with the most important point: [state your main idea clearly here].\n\nLet me walk you through three key points that support this.\n\nFirst, [point one with a specific example or data]. Second, [point two with context and evidence]. Third, [point three with your strongest supporting argument].\n\nIn summary, [restate your core message]. The single action I am asking you to take is [your call to action, stated clearly].\n\nThank you."
+  };
+  const text = examples[scenarioId] || examples['default'];
+  document.getElementById('speechText').value = text;
+  const words = text.trim().split(/\s+/).length;
+  document.getElementById('wordCount').textContent = words;
+});
+
+// ── Shuffle ──
+document.getElementById('shuffleBtn').addEventListener('click', () => {
+  const ids = Object.keys(SCENARIO_DATA);
+  const newId = ids[Math.floor(Math.random() * ids.length)];
+  window.location.href = 'practice.html?s=' + newId;
+});
+
+// ── Submit for feedback ──
+document.getElementById('submitBtn').addEventListener('click', function() {
+  const text = document.getElementById('speechText').value.trim();
+  if (!text || text.length < 50) { showToast('Please write at least a few sentences before submitting.', 'warning'); return; }
+
+  this.textContent = 'Analyzing...';
+  this.disabled = true;
+
+  setTimeout(() => {
+    // Mock AI feedback scores
+    const words = text.split(/\s+/).length;
+    const structure = Math.min(95, 50 + words * 0.3);
+    const clarity = Math.min(90, 45 + (words > 80 ? 35 : words * 0.4));
+    const delivery = Math.min(88, 40 + Math.random() * 40 + 10);
+    const overall = Math.round((structure + clarity + delivery) / 3);
+
+    // Animate ring
+    const circumference = 251.2;
+    const offset = circumference - (overall / 100) * circumference;
+    document.getElementById('scoreRing').style.strokeDashoffset = offset;
+    document.getElementById('scoreValue').textContent = overall + '%';
+
+    // Metrics
+    document.getElementById('metricsSection').innerHTML = `
+      <div class="metric-row"><div class="metric-label"><span>Structure</span><span>${Math.round(structure)}%</span></div><div class="metric-bar"><div class="metric-fill" style="width:${structure}%"></div></div></div>
+      <div class="metric-row"><div class="metric-label"><span>Clarity</span><span>${Math.round(clarity)}%</span></div><div class="metric-bar"><div class="metric-fill" style="width:${clarity}%"></div></div></div>
+      <div class="metric-row"><div class="metric-label"><span>Delivery</span><span>${Math.round(delivery)}%</span></div><div class="metric-bar"><div class="metric-fill" style="width:${delivery}%"></div></div></div>
+    `;
+
+    const feedbacks = [
+      words > 100 ? 'Good length — your response is substantive enough to demonstrate real thinking.' : 'Consider expanding your response to cover more of the structural guide. A fuller speech allows for better feedback.',
+      structure > 70 ? 'Your response follows a recognizable structure with a clear opening and closing.' : 'Work on your structural flow — try following the numbered guide steps more closely.',
+      clarity > 65 ? 'Language is mostly clear and direct. Keep cutting filler phrases for sharper impact.' : 'Focus on directness. Each sentence should add new information. Remove any repetition.',
+      'For your next session, try recording yourself aloud and listening back. Written and spoken delivery often diverge in ways that are difficult to catch in text.',
+    ];
+
+    document.getElementById('feedbackComments').innerHTML = feedbacks.map(f => `<div class="feedback-comment">${f}</div>`).join('');
+
+    this.textContent = 'Re-Submit';
+    this.disabled = false;
+    showToast('Feedback generated. Score: ' + overall + '%', 'success');
+  }, 1500);
+});
+</script>
+</body>
+</html>
